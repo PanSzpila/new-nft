@@ -88,7 +88,10 @@ const transaction = await createNft(umi, {
   isCollection: true,
 });
 
-await transaction.sendAndConfirm(umi);
+const txSig = await transaction.sendAndConfirm(umi); // --- zmiana: zapis sygnatury transakcji
+console.log("Transaction confirmed, signature:", txSig); // --- zmiana: log sygnatury
+
+await new Promise((r) => setTimeout(r, 2000)); // --- zmiana: krótka pauza, aby mint pojawił się on-chain
 
 const createdCollectionNft = await fetchDigitalAsset(
   umi,
