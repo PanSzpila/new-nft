@@ -1,5 +1,3 @@
-// https://youtu.be/amAq-WHAFs8?si=wEso-HFazJymlmBZ&t=14853
-
 //UMI = Universal Metaplex Interface
 // Metaplex = „silnik NFT na Solanie”
 
