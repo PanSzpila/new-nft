@@ -1,5 +1,3 @@
-// https://youtu.be/amAq-WHAFs8?si=oZBxZKtaD2hdE_5o&t=14975
-
 import {
   createNft,
   fetchDigitalAsset,
@@ -65,6 +63,28 @@ const transaction = await createNft(umi, {
 
 const txSig = await transaction.sendAndConfirm(umi); // --- zmiana: zapis sygnatury transakcji
 console.log("Transaction confirmed, signature:", txSig); // --- zmiana: log sygnatury
+
+// --- zmiana: konwertuj mint.publicKey na web3.js PublicKey przed użyciem connection.getAccountInfo
+const web3MintPubkey = new PublicKey(mint.publicKey); // <-- tutaj konwersja
+// --- koniec zmiany
+
+// --- zmiana: czekaj aż konto mint pojawi się on-chain (polling)
+// Reason: tx może być dopiero 'processed'/'confirmed' i konto jeszcze nie widoczne dla fetchDigitalAsset
+const MAX_WAIT_SEC = 20;
+let accountInfo = await connection.getAccountInfo(web3MintPubkey); // używamy web3PublicKey
+let waited = 0;
+while (!accountInfo && waited < MAX_WAIT_SEC) {
+  await new Promise((r) => setTimeout(r, 1000));
+  waited += 1;
+  accountInfo = await connection.getAccountInfo(web3MintPubkey);
+  console.log(`Waiting for mint account to appear... ${waited}s`);
+}
+if (!accountInfo) {
+  throw new Error(
+    `Mint account not found after ${MAX_WAIT_SEC}s. Transaction may be unconfirmed or failed. Check tx on explorer.`
+  );
+}
+// --- koniec zmiany
 
 await new Promise((r) => setTimeout(r, 2000)); // --- zmiana: krótka pauza, aby mint pojawił się on-chain
 
